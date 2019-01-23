@@ -18,15 +18,16 @@ try:
     potato125 = calibrate(potato125)
     potato125 = interpolate(potato125, 3, mode="spline")
 
-    with open(os.path.join(os.path.dirname(__file__), "chicken.pickle"), "rb") as f:
-        chicken = pickle.load(f, encoding="latin1")
-    chicken = calibrate(chicken)
-    chicken = interpolate(chicken, 3, mode="spline")
-    chicken = chicken[1400:2100]
-
-
 except ModuleNotFoundError:
     pass
+
+
+with open(os.path.join(os.path.dirname(__file__), "chicken.pickle"), "rb") as f:
+    chicken = pickle.load(f, encoding="latin1")
+chicken = calibrate(chicken)
+chicken = interpolate(chicken, 3, mode="spline")
+chicken = chicken[1400:2100]
+
 
 phantom = imread(data_dir + "/phantom.png", as_gray=True)
 
