@@ -1,17 +1,18 @@
 import matplotlib.pyplot as plt
 import pickle
+import os
 
-files = [# "test-40kv-0.15ma-0.20tint-1000lr-21_11_2018-13_43_19.pickle",
-         # "test-40kv-0.15ma-0.20tint-1000lr-21_11_2018-13_59_28.pickle",
-         # "test-40kv-0.15ma-0.20tint-1000lr-21_11_2018-14_04_36.pickle",
+files = ["test-40kv-0.15ma-0.20tint-1000lr-21_11_2018-13_43_19.pickle",
+         "test-40kv-0.15ma-0.20tint-1000lr-21_11_2018-13_59_28.pickle",
+         "test-40kv-0.15ma-0.20tint-1000lr-21_11_2018-14_04_36.pickle",
          "test-40kv-0.15ma-0.20tint-1000lr-21_11_2018-14_06_39.pickle",
          "test-40kv-0.37ma-0.20tint-1000lr-21_11_2018-14_07_35.pickle",
-         # "test-40kv-0.59ma-0.20tint-1000lr-21_11_2018-13_43_55.pickle",
+         "test-40kv-0.59ma-0.20tint-1000lr-21_11_2018-13_43_55.pickle",
          "test-40kv-0.59ma-0.20tint-1000lr-21_11_2018-14_08_26.pickle",
          "test-40kv-0.81ma-0.20tint-1000lr-21_11_2018-14_08_48.pickle",
-         # "test-40kv-1.03ma-0.20tint-1000lr-21_11_2018-13_44_37.pickle",
+         "test-40kv-1.03ma-0.20tint-1000lr-21_11_2018-13_44_37.pickle",
          "test-40kv-1.03ma-0.20tint-1000lr-21_11_2018-14_09_56.pickle",
-         # "test-40kv-1.25ma-0.20tint-1000lr-21_11_2018-14_10_17.pickle",
+         "test-40kv-1.25ma-0.20tint-1000lr-21_11_2018-14_10_17.pickle",
          "test-40kv-1.25ma-0.20tint-1000lr-21_11_2018-14_10_45.pickle",
          "test-50kv-0.15ma-0.20tint-1000lr-21_11_2018-14_14_39.pickle",
          "test-50kv-0.37ma-0.20tint-1000lr-21_11_2018-14_15_34.pickle",
@@ -46,6 +47,9 @@ images = {40: {},
           70: {},
           80: {}}
 
+
+# from utils import calibrate, interpolate, save
+
 for file in files:
     with open("%s/%s" % (path, file), "rb") as f:
         image = pickle.load(f, encoding="latin1")
@@ -56,12 +60,10 @@ for file in files:
 
     images[kv][ma] = image
 
-# plt.clf()
-# plt.title("Orange")
-# plt.imshow(noise_sample,
-#            interpolation='none',
-#            extent=[0, noise_sample.shape[1], 0, noise_sample.shape[0]])
+#     images[kv][ma] = interpolate(calibrate(image), 3, mode="gauss")
+#     fname = "%ikv-%.2fma.png" % (kv, ma)
 
-# # plt.draw()
-# # plt.pause(3.0)
-# plt.show()
+#     if os.path.exists(fname):
+#         fname = "%ikv-%.2fma_%s.png" % (kv, ma, file.split("-")[-1].split(".")[0])
+
+#     save(images[kv][ma], fname, title="%ikv, %.2fma" % (kv, ma), r=(0, 1), dpi=800)
