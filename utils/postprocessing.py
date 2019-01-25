@@ -151,3 +151,41 @@ def normalize(image, size):
         normalized[half_diff:-(half_diff + mod_diff), :] = scaled
 
     return normalized
+
+def adaptive_median(image):
+    base = numpy.empty_like(image)
+
+    view0 = create_view(image, 3)
+
+    z_min0 = numpy.min(view0, axis=2)
+    z_max0 = numpy.max(view0, axis=2)
+    z_med0 = numpy.median(view0, axis=2)
+    z_xy0 = view0[:, :, 3 * 3 // 2]
+
+    median_impulse_mask0 = (z_med0 - z_min0 > 0) & (z_med0 - z_max0 < 0)  # If median filter were to output an impulse (1 if not, 0 if impulse)
+    xy_impluse_mask0 = (z_xy0 - z_min0 > 0) & (z_xy0 - z_max0 < 0)  # is z_xy an impulse? 1: no, use xy. 0: yes, use median
+    xy_impluse_invert_mask0 = numpy.bitwise_not(xy_impluse_mask0)
+    level_up_mask0 = numpy.bitwise_not(median_impulse_mask0)  # Found impulse, extend region
+
+    base[median_impulse_mask0 & xy_impluse_mask0] = z_xy0[median_impulse_mask0 & xy_impluse_mask0]
+    base[median_impulse_mask0 & xy_impluse_invert_mask0] = z_med0[median_impulse_mask0 & xy_impluse_invert_mask0]
+
+    view1 = create_view(image, 5)
+
+    # This level is different than the first. All views are cropped to the (x,y) in level_up_mask0.
+    z_min1 = numpy.min(view1[level_up_mask0], axis=1)
+    z_max1 = numpy.max(view1[level_up_mask0], axis=1)
+    z_med1 = numpy.median(view1[level_up_mask0], axis=1)
+    z_xy1 = view1[level_up_mask0][:, 5 * 5 // 2]
+
+    median_impulse_mask1 = (z_med1 - z_min1 > 0) & (z_med1 - z_max1 < 0)  # If median filter were to output an impulse (1 if not, 0 if impulse)
+    xy_impluse_mask1 = (z_xy1 - z_min1 > 0) & (z_xy1 - z_max1 < 0)  # is z_xy an impulse? 1: no, use xy. 0: yes, use median
+    level_up_mask1 = numpy.bitwise_not(median_impulse_mask1)  # Found impulse, extend region
+
+    t1 = median_impulse_mask1 * xy_impluse_mask1 * z_xy1
+    t2 = median_impulse_mask1 * numpy.bitwise_not(xy_impluse_mask1) * z_med1
+    t3 = level_up_mask1 * z_xy1
+
+    base[level_up_mask0] = t1 + t2 + t3
+
+    return base
