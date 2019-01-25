@@ -22,12 +22,25 @@ def spline_transform(image, h_ratio, v_ratio):
 
 
 def median_transform(image, ratio):
-    assert ratio == 3
+    assert 1 < ratio
     h = image.shape[0]
-    h -= h % 3
+    h -= h % ratio
     image = image[:h]
 
-    return numpy.max((image[0::3], image[1::3], image[2::3]), axis=0)
+    view = [image[n::ratio] for n in range(ratio)]
+
+    return numpy.median(view, axis=0)
+
+
+def mean_transform(image, ratio):
+    assert 1 < ratio
+    h = image.shape[0]
+    h -= h % ratio
+    image = image[:h]
+
+    view = [image[n::ratio] for n in range(ratio)]
+
+    return numpy.mean(view, axis=0)
 
 
 def gauss(x, sd):
@@ -52,6 +65,8 @@ def interpolate(image, ratio, mode, sd=0.8):
         return lanczos_transform(image, image.shape[0] // ratio, image.shape[1])
     elif mode == "median":
         return median_transform(image, ratio)
+    elif mode == "mean":
+        return mean_transform(image, ratio)
     elif mode == "gauss":
         return gauss_tranform(image, ratio, sd)
     elif mode == "spline":
