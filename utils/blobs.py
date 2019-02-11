@@ -119,16 +119,40 @@ class Blob():
         ds = numpy.linalg.norm(self.edges[:, numpy.newaxis] - other.edges, axis=2)
         return numpy.min(ds)
 
+    def connecting(self, other):
+        # Assuming 'other' is a segment and not a blob
+
+        if self.y + self.h == other.y:
+            if self.edge_middle.shape[0] != 0:
+                pairs = self.edge_middle.T
+
+                left_x = pairs[0, -2]
+                right_x = pairs[0, -1]
+
+                other_in_self = (other.x <= left_x <= other.x + other.w or
+                                 other.x <= right_x <= other.x + other.w)
+                self_in_other = (left_x <= other.x <= right_x or
+                                 left_x <= other.x + other.w <= right_x)
+
+                return other_in_self or self_in_other
+
+            else:
+                # Fall back to rects when there is no middle section
+                other_in_self = (other.x <= self.x <= other.x + other.w or
+                                 other.x <= self.x + self.w <= other.x + other.w)
+
+                self_in_other = (self.x <= other.x <= self.x + self.w or
+                                 self.x <= other.x + other.w <= self.x + self.w)
+
+                return other_in_self or self_in_other
+        else:
+            return False
+
 
 def near(target, blobs, distance_threshold):
-    nearest = []
     for blob in blobs:
-        d = target.dist(blob)
-        if d <= distance_threshold:
-            nearest.append(blob)
-
-    if len(nearest) > 0:
-        return nearest[-1]  # TODO: Why does it work with selecting the last???
+        if blob.connecting(target):
+            return blob
     else:
         return None
 
@@ -162,26 +186,6 @@ def blob_detection(image, distance_threshold):
             blobs.append(line_segment)
         else:
             closest_blob += line_segment
-
-    # This is stupid, but it works ... slow! Compare all blobs and merge the ones close
-    while True:
-        go = False
-        for a in blobs:
-            for b in blobs:
-                if a == b:
-                    continue
-
-                if a.dist(b) < distance_threshold:
-                    a.merge(b)
-                    blobs.remove(b)
-
-                    go = True
-                    break
-            if go:
-                break
-
-        if not go:
-            break
 
     return list(filter(lambda x: x.h != 1, blobs))
 
