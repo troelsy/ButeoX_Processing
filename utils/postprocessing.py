@@ -4,6 +4,7 @@ import scipy.misc
 import scipy.ndimage
 import os
 import pickle
+from PIL import Image
 
 
 with open(os.path.join(os.path.dirname(__file__), "black.pickle"), "rb") as f:
@@ -11,7 +12,8 @@ with open(os.path.join(os.path.dirname(__file__), "black.pickle"), "rb") as f:
 
 
 def lanczos_transform(image, h_size, v_size):
-    return scipy.misc.imresize(image, h_size, v_size, interp="lanczos")
+    return numpy.array(Image.fromarray(image).resize((h_size, v_size)))
+    # return scipy.misc.imresize(image, h_size, v_size, interp="lanczos")
 
 
 def spline_transform(image, h_ratio, v_ratio):
