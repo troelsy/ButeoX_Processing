@@ -11,8 +11,8 @@ from utils.blobs import mask, draw_blobs, blob_detection, filter_ratio
 
 
 def mape(subject, truth):
-    return 1/len(subject) * numpy.sum(numpy.abs((truth - subject) / truth))
+    return 1/subject.size * numpy.sum(numpy.abs((truth - subject) / truth))
 
 
 def mse(subject, truth):
-    return 1/len(subject) * numpy.sum(numpy.power(subject - truth, 2))
+    return 1/subject.size * numpy.sum(numpy.power(subject - truth, 2))
